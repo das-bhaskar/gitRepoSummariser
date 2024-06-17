@@ -18,8 +18,11 @@ def clone_repository(repo_url):
     Returns:
         git.Repo: The cloned repository object.
     """
+    destination = "cloned_repo"
+    if os.path.exists(destination):
+        shutil.rmtree(destination)  # Delete the existing directory
     try:
-        repo = git.Repo.clone_from(repo_url, "cloned_repo")
+        repo = git.Repo.clone_from(repo_url, destination)
         return repo
     except git.exc.GitCommandError as e:
         raise RuntimeError(f"Failed to clone repository: {e}")
@@ -43,7 +46,38 @@ def traverse_repository(repo):
             file_contents[file_path] = None  # Handle non-text or inaccessible files
     return file_contents
 
-# Other functions remain the same...
+def analyze_with_gemini(content):
+    """
+    Analyze content using Gemini AI.
+
+    Args:
+        content (str): The content to analyze.
+
+    Returns:
+        str: The analysis result.
+    """
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        content = content + " analyse everything thoroughly then summarize and explain. guide how to use this GitHub repo and show all resources listed and categorise everything. present in great detail"
+        response = model.generate_content(content)
+        return response.text
+    except requests.exceptions.RequestException as e:
+        return f"Request failed: {e}"
+
+def extract_readme(repo_files):
+    """
+    Extract the README file contents if present.
+    
+    Args:
+        repo_files (dict): A dictionary with file paths as keys and file contents as values.
+        
+    Returns:
+        str: The contents of the README file, or None if not found.
+    """
+    for file_path, content in repo_files.items():
+        if 'README' in os.path.basename(file_path).upper():
+            return content
+    return None
 
 def main():
     st.title("GitHub Repository Summary")
