@@ -22,8 +22,7 @@ def clone_repository(repo_url):
         repo = git.Repo.clone_from(repo_url, "cloned_repo")
         return repo
     except git.exc.GitCommandError as e:
-        st.error("Error:", e)
-        return None
+        raise RuntimeError(f"Failed to clone repository: {e}")
 
 def traverse_repository(repo):
     """
@@ -53,8 +52,8 @@ def main():
     repo_url = st.text_input("Enter GitHub repository URL:")
     if st.button("Submit"):
         if repo_url:
-            repo = clone_repository(repo_url)
-            if repo:
+            try:
+                repo = clone_repository(repo_url)
                 st.success("Repository cloned successfully.")
                 repo_files = traverse_repository(repo)
                 readme_content = extract_readme(repo_files)
@@ -64,8 +63,8 @@ def main():
                     # Add conversation logic here based on context
                 else:
                     st.warning("No README file found.")
-            else:
-                st.error("Failed to clone repository.")
+            except RuntimeError as e:
+                st.error(str(e))
         else:
             st.warning("Please enter a valid GitHub repository URL.")
 
