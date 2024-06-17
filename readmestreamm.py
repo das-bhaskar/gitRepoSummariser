@@ -6,7 +6,7 @@ import requests
 import google.generativeai as genai
 
 # Configure the Gemini API key
-genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", ""))
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY", ""))
 
 def clear_directory(directory):
     """
@@ -105,7 +105,7 @@ def main():
     repo_url = st.text_input("Enter GitHub repository URL:")
     if st.button("Submit"):
         if repo_url:
-            destination = "/Users/bD/Desktop/Coding/projects/gitreader/repoload"  # Specify destination directory for cloning
+            destination = os.path.join(os.getcwd(), "repoload")  # Specify destination directory for cloning
             cloned_repo_path = clone_repository(repo_url, destination)
             if cloned_repo_path:
                 st.success("Repository cloned successfully.")
